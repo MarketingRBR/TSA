@@ -1,0 +1,960 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DESAFIO TSA — Nível Expert</title>
+<style>
+  :root{
+    --azul-tsa:#12336b;
+    --azul-tsa-2:#1a4a94;
+    --azul-claro:#3f7fd1;
+    --branco:#ffffff;
+    --cinza-100:#f4f6f9;
+    --cinza-200:#e4e9f0;
+    --cinza-400:#a9b4c4;
+    --cinza-700:#4a5568;
+    --verde:#1fa15a;
+    --vermelho:#d3372c;
+    --amarelo:#f2a30f;
+    --sombra: 0 10px 30px rgba(18,51,107,0.18);
+    --radius: 18px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:'Segoe UI', Roboto, Arial, sans-serif;
+    background:
+      radial-gradient(circle at 15% 10%, rgba(63,127,209,0.25), transparent 40%),
+      radial-gradient(circle at 90% 85%, rgba(63,127,209,0.18), transparent 45%),
+      linear-gradient(160deg, #0b1e42 0%, #12336b 45%, #163f80 100%);
+    min-height:100vh;
+    color:var(--branco);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:16px;
+    overflow-x:hidden;
+  }
+  .app{
+    width:100%;
+    max-width:720px;
+  }
+  .card{
+    background:var(--branco);
+    color:#1c2536;
+    border-radius:var(--radius);
+    box-shadow:var(--sombra);
+    padding:32px 28px;
+    position:relative;
+    overflow:hidden;
+  }
+  .card::before{
+    content:"";
+    position:absolute;
+    top:0;left:0;right:0;
+    height:6px;
+    background:linear-gradient(90deg,var(--azul-tsa),var(--azul-claro),var(--azul-tsa));
+  }
+  /* ---------- TELA ABERTURA ---------- */
+  .screen{display:none;}
+  .screen.active{display:block;animation:fadeIn .4s ease;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+
+  .logo-badge{
+    display:flex;align-items:center;justify-content:center;
+    margin:0 auto 18px auto;
+    width:120px;height:70px;
+  }
+  .logo-badge svg{width:100%;height:100%;}
+
+  .titulo-principal{
+    text-align:center;
+    font-size:2.1rem;
+    font-weight:800;
+    letter-spacing:1px;
+    color:var(--azul-tsa);
+    margin:6px 0 2px 0;
+    line-height:1.15;
+  }
+  .titulo-principal span{color:var(--azul-claro);}
+  .subtitulo{
+    text-align:center;
+    color:var(--cinza-700);
+    font-size:1.05rem;
+    margin-bottom:22px;
+    font-style:italic;
+  }
+  .nivel-tag{
+    display:inline-block;
+    background:linear-gradient(90deg,var(--azul-tsa),var(--azul-claro));
+    color:#fff;
+    font-weight:700;
+    font-size:.75rem;
+    letter-spacing:2px;
+    padding:6px 14px;
+    border-radius:30px;
+    margin:0 auto 16px auto;
+    display:block;
+    width:fit-content;
+  }
+  .intro-info{
+    background:var(--cinza-100);
+    border-left:4px solid var(--azul-claro);
+    border-radius:10px;
+    padding:14px 16px;
+    font-size:.92rem;
+    color:var(--cinza-700);
+    margin-bottom:22px;
+    line-height:1.55;
+  }
+  .intro-info b{color:var(--azul-tsa);}
+  .grid-info{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:10px;
+    margin-bottom:24px;
+  }
+  .info-box{
+    background:var(--cinza-100);
+    border-radius:12px;
+    padding:12px 6px;
+    text-align:center;
+  }
+  .info-box .num{font-size:1.4rem;font-weight:800;color:var(--azul-tsa);}
+  .info-box .lbl{font-size:.7rem;color:var(--cinza-700);text-transform:uppercase;letter-spacing:.5px;}
+
+  .btn{
+    display:block;
+    width:100%;
+    border:none;
+    cursor:pointer;
+    font-weight:700;
+    font-size:1.05rem;
+    padding:16px;
+    border-radius:14px;
+    letter-spacing:.5px;
+    transition:transform .15s ease, box-shadow .15s ease, background .15s ease;
+  }
+  .btn-primary{
+    background:linear-gradient(90deg,var(--azul-tsa),var(--azul-claro));
+    color:#fff;
+    box-shadow:0 8px 20px rgba(26,74,148,0.35);
+  }
+  .btn-primary:hover{transform:translateY(-2px);box-shadow:0 12px 26px rgba(26,74,148,0.45);}
+  .btn-primary:active{transform:translateY(0);}
+  .btn-secondary{
+    background:var(--cinza-100);
+    color:var(--azul-tsa);
+    border:2px solid var(--azul-tsa);
+    margin-top:12px;
+  }
+  .btn-secondary:hover{background:var(--cinza-200);}
+
+  /* ---------- TELA PERGUNTA ---------- */
+  .top-bar{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-bottom:14px;
+    flex-wrap:wrap;
+    gap:8px;
+  }
+  .q-count{
+    font-weight:700;
+    color:var(--azul-tsa);
+    font-size:.95rem;
+  }
+  .score-pill{
+    background:var(--azul-tsa);
+    color:#fff;
+    font-weight:700;
+    font-size:.85rem;
+    padding:6px 14px;
+    border-radius:20px;
+  }
+  .progress-track{
+    width:100%;
+    height:8px;
+    background:var(--cinza-200);
+    border-radius:6px;
+    overflow:hidden;
+    margin-bottom:18px;
+  }
+  .progress-fill{
+    height:100%;
+    background:linear-gradient(90deg,var(--azul-tsa),var(--azul-claro));
+    width:0%;
+    transition:width .35s ease;
+  }
+  .timer-wrap{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    margin-bottom:18px;
+  }
+  .timer-circle{
+    width:86px;height:86px;
+    border-radius:50%;
+    border:6px solid var(--cinza-200);
+    display:flex;align-items:center;justify-content:center;
+    font-size:2rem;
+    font-weight:800;
+    color:var(--azul-tsa);
+    position:relative;
+    transition:border-color .3s ease, color .3s ease, transform .2s ease;
+  }
+  .timer-circle.warning{
+    border-color:var(--amarelo);
+    color:var(--amarelo);
+  }
+  .timer-circle.danger{
+    border-color:var(--vermelho);
+    color:var(--vermelho);
+    animation:pulse 1s infinite;
+  }
+  @keyframes pulse{
+    0%{transform:scale(1);}
+    50%{transform:scale(1.08);}
+    100%{transform:scale(1);}
+  }
+  .timer-label{
+    font-size:.68rem;
+    color:var(--cinza-700);
+    letter-spacing:1.5px;
+    text-transform:uppercase;
+    margin-top:4px;
+  }
+
+  .categoria-tag{
+    display:inline-block;
+    background:var(--cinza-100);
+    color:var(--azul-tsa);
+    font-size:.72rem;
+    font-weight:700;
+    letter-spacing:1px;
+    text-transform:uppercase;
+    padding:4px 10px;
+    border-radius:8px;
+    margin-bottom:10px;
+  }
+  .pergunta-texto{
+    font-size:1.12rem;
+    font-weight:700;
+    color:#1c2536;
+    line-height:1.5;
+    margin-bottom:20px;
+  }
+  .alternativas{
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+  }
+  .alt-btn{
+    display:flex;
+    align-items:flex-start;
+    gap:12px;
+    text-align:left;
+    background:var(--cinza-100);
+    border:2px solid var(--cinza-200);
+    border-radius:14px;
+    padding:14px 16px;
+    font-size:.97rem;
+    color:#1c2536;
+    cursor:pointer;
+    transition:all .15s ease;
+    min-height:56px;
+  }
+  .alt-btn:hover:not(:disabled){
+    border-color:var(--azul-claro);
+    background:#eef4fc;
+  }
+  .alt-btn:active:not(:disabled){transform:scale(0.99);}
+  .alt-letra{
+    flex:0 0 30px;
+    width:30px;height:30px;
+    border-radius:50%;
+    background:var(--azul-tsa);
+    color:#fff;
+    display:flex;align-items:center;justify-content:center;
+    font-weight:800;
+    font-size:.85rem;
+  }
+  .alt-btn.correct{
+    background:#e5f7ec;
+    border-color:var(--verde);
+  }
+  .alt-btn.correct .alt-letra{background:var(--verde);}
+  .alt-btn.incorrect{
+    background:#fbe9e7;
+    border-color:var(--vermelho);
+  }
+  .alt-btn.incorrect .alt-letra{background:var(--vermelho);}
+  .alt-btn:disabled{cursor:default;opacity:.85;}
+  .alt-btn:disabled:not(.correct):not(.incorrect){opacity:.5;}
+
+  /* ---------- TELA FEEDBACK ---------- */
+  .feedback-box{
+    text-align:center;
+    margin-bottom:16px;
+  }
+  .feedback-icon{
+    font-size:2.6rem;
+    margin-bottom:6px;
+  }
+  .feedback-title{
+    font-size:1.3rem;
+    font-weight:800;
+    margin-bottom:4px;
+  }
+  .feedback-title.ok{color:var(--verde);}
+  .feedback-title.fail{color:var(--vermelho);}
+  .feedback-pts{
+    font-size:.9rem;
+    color:var(--cinza-700);
+    margin-bottom:14px;
+  }
+  .resposta-linha{
+    background:var(--cinza-100);
+    border-radius:10px;
+    padding:10px 14px;
+    font-size:.88rem;
+    margin-bottom:6px;
+    color:#1c2536;
+  }
+  .explicacao-box{
+    background:#eef4fc;
+    border-left:4px solid var(--azul-tsa);
+    border-radius:10px;
+    padding:14px 16px;
+    margin-top:14px;
+    font-size:.92rem;
+    line-height:1.55;
+    color:#1c2536;
+  }
+  .explicacao-box b{color:var(--azul-tsa);}
+
+  /* ---------- TELA RESULTADO ---------- */
+  .resultado-header{text-align:center;margin-bottom:10px;}
+  .trofeu{font-size:3.4rem;margin-bottom:6px;display:block;}
+  .classificacao{
+    font-weight:800;
+    font-size:1.3rem;
+    margin-bottom:4px;
+  }
+  .mensagem-final{
+    text-align:center;
+    color:var(--cinza-700);
+    font-size:.95rem;
+    margin-bottom:20px;
+    line-height:1.5;
+    padding:0 6px;
+  }
+  .pontuacao-grande{
+    text-align:center;
+    margin-bottom:20px;
+  }
+  .pontuacao-grande .valor{
+    font-size:3rem;
+    font-weight:900;
+    color:var(--azul-tsa);
+    line-height:1;
+  }
+  .pontuacao-grande .max{
+    font-size:1.1rem;
+    color:var(--cinza-400);
+    font-weight:700;
+  }
+  .stats-grid{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:10px;
+    margin-bottom:18px;
+  }
+  .stat-card{
+    background:var(--cinza-100);
+    border-radius:12px;
+    padding:14px;
+    text-align:center;
+  }
+  .stat-card .valor{
+    font-size:1.5rem;
+    font-weight:800;
+    color:var(--azul-tsa);
+  }
+  .stat-card .rotulo{
+    font-size:.72rem;
+    color:var(--cinza-700);
+    text-transform:uppercase;
+    letter-spacing:.5px;
+  }
+  .barra-final-wrap{margin-bottom:22px;}
+  .barra-final-label{
+    display:flex;justify-content:space-between;
+    font-size:.78rem;color:var(--cinza-700);margin-bottom:6px;
+  }
+  .barra-final-track{
+    width:100%;height:14px;background:var(--cinza-200);border-radius:8px;overflow:hidden;
+  }
+  .barra-final-fill{
+    height:100%;border-radius:8px;
+    background:linear-gradient(90deg,var(--azul-tsa),var(--azul-claro));
+    width:0%;
+    transition:width 1s ease;
+  }
+  .confetti{
+    position:fixed;
+    top:-10px;
+    width:10px;height:16px;
+    opacity:.9;
+    z-index:999;
+    animation:fall linear forwards;
+  }
+  @keyframes fall{
+    to{transform:translateY(110vh) rotate(720deg); opacity:0;}
+  }
+  footer.brand{
+    text-align:center;
+    font-size:.72rem;
+    color:rgba(255,255,255,0.6);
+    margin-top:18px;
+    letter-spacing:1px;
+  }
+  @media (max-width:480px){
+    .card{padding:22px 16px;}
+    .titulo-principal{font-size:1.6rem;}
+    .grid-info{grid-template-columns:repeat(3,1fr);gap:6px;}
+    .timer-circle{width:72px;height:72px;font-size:1.6rem;}
+    .pergunta-texto{font-size:1.02rem;}
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <div class="card" id="cardMain">
+
+    <!-- TELA 1: ABERTURA -->
+    <div class="screen active" id="screen-abertura">
+      <div class="logo-badge">
+        <svg viewBox="0 0 1600 700" xmlns="http://www.w3.org/2000/svg">
+          <ellipse cx="800" cy="350" rx="780" ry="330" fill="none" stroke="#12336b" stroke-width="90"/>
+          <text x="800" y="430" font-family="Arial, sans-serif" font-weight="900" font-size="300" fill="#12336b" text-anchor="middle" letter-spacing="10">TSA</text>
+        </svg>
+      </div>
+      <div class="nivel-tag">NÍVEL EXPERT</div>
+      <div class="titulo-principal">DESAFIO <span>TSA</span></div>
+      <div class="subtitulo">"Você realmente conhece TSA?"</div>
+
+      <div class="intro-info">
+        Este é um <b>desafio técnico</b> para profissionais do mercado automotivo — vendedores, promotores e distribuidores.
+        As perguntas cobrem <b>linhas de produto, funcionamento de componentes, procedimentos oficiais de instalação/calibração,
+        diagnóstico e situações reais de oficina</b>. Nível avançado: pense antes de responder.
+      </div>
+
+      <div class="grid-info">
+        <div class="info-box"><div class="num">20</div><div class="lbl">Perguntas</div></div>
+        <div class="info-box"><div class="num">50s</div><div class="lbl">Por questão</div></div>
+        <div class="info-box"><div class="num">2000</div><div class="lbl">Pts máximos</div></div>
+      </div>
+
+      <button class="btn btn-primary" onclick="iniciarQuiz()">🚀 COMEÇAR DESAFIO</button>
+    </div>
+
+    <!-- TELA 2: PERGUNTA -->
+    <div class="screen" id="screen-pergunta">
+      <div class="top-bar">
+        <div class="q-count" id="qCount">Pergunta 1 de 20</div>
+        <div class="score-pill" id="scorePill">0 pts</div>
+      </div>
+      <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+
+      <div class="timer-wrap">
+        <div class="timer-circle" id="timerCircle">50</div>
+        <div class="timer-label">segundos restantes</div>
+      </div>
+
+      <div class="categoria-tag" id="categoriaTag">CATEGORIA</div>
+      <div class="pergunta-texto" id="perguntaTexto">...</div>
+      <div class="alternativas" id="alternativasBox"></div>
+    </div>
+
+    <!-- TELA 3: FEEDBACK -->
+    <div class="screen" id="screen-feedback">
+      <div class="feedback-box">
+        <div class="feedback-icon" id="feedbackIcon">✅</div>
+        <div class="feedback-title ok" id="feedbackTitle">RESPOSTA CORRETA!</div>
+        <div class="feedback-pts" id="feedbackPts">+150 pontos</div>
+      </div>
+      <div id="respostaLinhas"></div>
+      <div class="explicacao-box">
+        <b>EXPLICAÇÃO TÉCNICA:</b>
+        <div id="explicacaoTexto" style="margin-top:6px;"></div>
+      </div>
+      <button class="btn btn-primary" style="margin-top:20px;" onclick="proximaPergunta()" id="btnProxima">PRÓXIMA PERGUNTA →</button>
+    </div>
+
+    <!-- TELA 4: RESULTADO -->
+    <div class="screen" id="screen-resultado">
+      <div class="resultado-header">
+        <span class="trofeu" id="trofeuFinal">🏆</span>
+        <div class="classificacao" id="classificacaoTexto">EXPERT TSA</div>
+      </div>
+      <div class="mensagem-final" id="mensagemFinal"></div>
+
+      <div class="pontuacao-grande">
+        <div class="valor" id="pontuacaoFinal">0</div>
+        <div class="max">/ 2000 PONTOS</div>
+      </div>
+
+      <div class="barra-final-wrap">
+        <div class="barra-final-label"><span>Percentual de acerto</span><span id="percentualLabel">0%</span></div>
+        <div class="barra-final-track"><div class="barra-final-fill" id="barraFinalFill"></div></div>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card"><div class="valor" id="acertosFinal">0/20</div><div class="rotulo">Acertos</div></div>
+        <div class="stat-card"><div class="valor" id="errosFinal">0/20</div><div class="rotulo">Erros</div></div>
+        <div class="stat-card"><div class="valor" id="tempoMedioFinal">0s</div><div class="rotulo">Tempo médio</div></div>
+        <div class="stat-card"><div class="valor" id="dominioFinal">0/20</div><div class="rotulo">Desafios dominados</div></div>
+      </div>
+
+      <button class="btn btn-primary" onclick="reiniciarQuiz()">🔁 REFAZER DESAFIO</button>
+    </div>
+
+  </div>
+  <footer class="brand">TSA \\ te leva mais longe — Desafio Técnico Interativo</footer>
+</div>
+
+<script>
+/* ============================================================
+   BANCO DE 20 PERGUNTAS — baseado em conteúdo oficial TSA
+   (linhas de produto T-01 a T-14, procedimento de substituição/
+   calibração do sensor de nível, condições de garantia, e
+   princípios técnicos padrão de funcionamento dos componentes)
+   ============================================================ */
+const perguntas = [
+  {
+    categoria:"Procedimento Oficial",
+    texto:"Ao encontrar oxidação nos terminais do conector e anéis de vedação danificados durante a substituição do sensor de nível de combustível em veículo flex, qual é o procedimento correto segundo a TSA?",
+    alternativas:[
+      "Instalar o novo sensor normalmente, sem corrigir os problemas encontrados",
+      "Corrigir a oxidação e a vedação antes de montar o novo sensor, evitando danos ao componente novo",
+      "Testar o circuito elétrico do veículo sem realizar qualquer correção prévia",
+      "Descartar todo o conjunto bomba e substituir por um novo"
+    ],
+    correta:1,
+    explicacao:"O procedimento oficial da TSA determina que oxidação nos terminais e anéis de vedação danificados devem ser corrigidos ANTES da instalação do novo sensor, para evitar infiltração de combustível e danos prematuros ao componente recém-instalado."
+  },
+  {
+    categoria:"Procedimento Oficial",
+    texto:"Qual é a sequência correta de calibração do sensor de nível de combustível após a instalação, conforme o procedimento técnico da TSA?",
+    alternativas:[
+      "Posição vazio → desligar bateria 5 min → ligar e conferir vazio → posição cheio → desligar bateria 5 min → ligar e conferir cheio",
+      "Ligar a chave e girar a haste manualmente sem desligar a bateria",
+      "Posição cheio primeiro, depois vazio, sem necessidade de desligar a bateria",
+      "Basta ligar o veículo; a calibração é automática sem qualquer intervenção"
+    ],
+    correta:0,
+    explicacao:"O procedimento exige colocar a haste na posição vazio, desligar a bateria por 5 minutos, religar e conferir a indicação de vazio; depois repetir o processo com a haste na posição cheio, sempre desligando a bateria por 5 minutos entre as etapas."
+  },
+  {
+    categoria:"Procedimento Oficial",
+    texto:"Por que o procedimento da TSA orienta retirar o fusível da bomba de combustível antes de manusear os conectores durante a instalação do sensor?",
+    alternativas:[
+      "Para impedir o acionamento indevido da bomba durante o manuseio, evitando vazamento ou dano aos componentes",
+      "Porque o fusível controla a resistência interna do sensor",
+      "Para resetar um código de falha do módulo ABS",
+      "É uma exigência exclusiva de veículos a GNV"
+    ],
+    correta:0,
+    explicacao:"Retirar o fusível impede que a bomba de combustível seja acionada acidentalmente durante o manuseio do conjunto, o que é uma prática de segurança padrão ao trabalhar em sistemas de alimentação."
+  },
+  {
+    categoria:"Garantia",
+    texto:"Qual é o prazo de garantia da TSA contra defeitos de fabricação, já incluindo os 90 dias previstos em lei para defeitos aparentes?",
+    alternativas:["3 meses","6 meses","12 meses","24 meses"],
+    correta:1,
+    explicacao:"A TSA garante seus produtos por 6 meses a partir da data de aquisição, prazo que já inclui os 90 dias legais para defeitos de fabricação aparentes ou de fácil constatação."
+  },
+  {
+    categoria:"Garantia",
+    texto:"Para que a garantia de um produto TSA seja validada, o consumidor deve apresentar:",
+    alternativas:[
+      "Apenas o produto com defeito, sem qualquer documento",
+      "A Nota Fiscal de compra junto ao Certificado de Garantia",
+      "Um laudo de oficina credenciada",
+      "O número de série informado por telefone"
+    ],
+    correta:1,
+    explicacao:"A garantia só é válida mediante apresentação da Nota Fiscal referente à compra do produto, junto ao Certificado de Garantia correspondente."
+  },
+  {
+    categoria:"Garantia",
+    texto:"A garantia TSA NÃO cobre situações em que o defeito for causado por:",
+    alternativas:[
+      "Defeito de fabricação identificado nos primeiros meses de uso",
+      "Mau uso do produto, acidentes ou instalação inadequada",
+      "Substituição regular do produto por um novo de mesmo período de garantia",
+      "Defeito de fácil constatação no ato da compra"
+    ],
+    correta:1,
+    explicacao:"A garantia expressamente não abrange defeitos ou danos decorrentes de mau uso, acidentes, instalação inadequada ou de outros componentes do veículo."
+  },
+  {
+    categoria:"Linha de Produtos",
+    texto:"Um caminhão apresenta reclamação de marcador de combustível impreciso. Qual linha de produto TSA deve ser consultada primeiro, considerando que se trata de um veículo de linha pesada?",
+    alternativas:[
+      "T-01 — Sensor de Nível de Combustível (Linha Leve)",
+      "T-07 — Sensor de Nível de Combustível (Linha Pesada)",
+      "T-13 — Sensor ABS",
+      "T-11 — Sensor de Velocidade (VSS)"
+    ],
+    correta:1,
+    explicacao:"Para veículos de linha pesada (caminhões), a TSA disponibiliza uma linha específica de sensores de nível — a T-07 — separada da linha leve (T-01), que atende automóveis de passeio."
+  },
+  {
+    categoria:"Linha de Produtos",
+    texto:"Qual código de linha TSA corresponde ao sensor utilizado especificamente para monitorar o nível de Arla 32 (fluido de arrefecimento de gases) em veículos pesados?",
+    alternativas:["T-07","T-071","T-08","T-12"],
+    correta:1,
+    explicacao:"A linha T-071 é destinada especificamente ao Sensor de Nível do Arla 32, sendo uma linha distinta da T-07 (sensor de nível de combustível), ambas de aplicação em linha pesada."
+  },
+  {
+    categoria:"Diagnóstico Técnico",
+    texto:"Um motor apresenta falha de partida intermitente e o scanner indica perda momentânea do sinal de rotação do virabrequim. Qual componente da linha TSA está diretamente relacionado a esse sintoma?",
+    alternativas:[
+      "T-081 — Sensor de Fase (CMP)",
+      "T-08 — Sensor de Rotação (PMS-CKP)",
+      "T-13 — Sensor ABS",
+      "T-11 — Sensor de Velocidade (VSS)"
+    ],
+    correta:1,
+    explicacao:"O Sensor de Rotação (PMS-CKP), linha T-08, é responsável por informar à central eletrônica a posição e a velocidade de rotação do virabrequim. A perda desse sinal causa falhas de partida e de sincronismo de injeção/ignição."
+  },
+  {
+    categoria:"Diagnóstico Técnico",
+    texto:"Qual é a principal diferença funcional entre o Sensor de Rotação (PMS-CKP, T-08) e o Sensor de Fase (CMP, T-081)?",
+    alternativas:[
+      "O CKP informa a posição/rotação do virabrequim para o sincronismo geral do motor, enquanto o CMP identifica em qual tempo (admissão/compressão) cada cilindro se encontra, permitindo a injeção sequencial correta",
+      "Ambos exercem exatamente a mesma função e são intercambiáveis entre si",
+      "O CMP mede exclusivamente a temperatura do motor",
+      "O CKP é utilizado apenas em motores a diesel de linha pesada"
+    ],
+    correta:0,
+    explicacao:"O CKP (virabrequim) fornece a referência de rotação e posição angular do motor; o CMP (comando de válvulas) identifica o ciclo de cada cilindro, permitindo que a injeção eletrônica sequencial dispare o injetor certo no momento certo — funções complementares, não intercambiáveis."
+  },
+  {
+    categoria:"Diagnóstico Técnico",
+    texto:"A luz do ABS acende no painel e o sistema perde a leitura de rotação de uma roda específica. Qual componente da linha TSA deve ser investigado primeiro?",
+    alternativas:[
+      "T-11 — Sensor de Velocidade (VSS)",
+      "T-13 — Sensor ABS",
+      "T-12 — Regulador de pressão",
+      "T-081 — Sensor de Fase (CMP)"
+    ],
+    correta:1,
+    explicacao:"O Sensor ABS (T-13) monitora a rotação individual de cada roda para o módulo de freios. A perda de leitura em uma roda específica, com acendimento da luz ABS, aponta diretamente para esse componente."
+  },
+  {
+    categoria:"Comparação de Aplicações",
+    texto:"Qual é a diferença de aplicação entre o Sensor de Velocidade (VSS, T-11) e o Sensor ABS (T-13)?",
+    alternativas:[
+      "O VSS informa a velocidade geral do veículo ao painel/central eletrônica (via câmbio/transmissão), enquanto o Sensor ABS monitora a rotação individual de cada roda para o sistema de frenagem",
+      "São o mesmo componente, apenas com nomenclatura comercial diferente",
+      "O VSS é usado exclusivamente no sistema de freios",
+      "O Sensor ABS mede a pressão dos pneus, não a rotação das rodas"
+    ],
+    correta:0,
+    explicacao:"O VSS gera um sinal único de velocidade do veículo (geralmente a partir da transmissão) para o painel e a central; já o Sensor ABS é instalado individualmente em cada roda, monitorando sua rotação para o controle de frenagem/tração."
+  },
+  {
+    categoria:"Aplicação Técnica",
+    texto:"Um veículo passou por preparação e necessita de ajuste fino na pressão de combustível para adequação da injeção. Qual linha TSA é mais adequada para essa necessidade, frente ao regulador de pressão convencional?",
+    alternativas:[
+      "T-12 — Regulador de pressão (padrão/fixo)",
+      "T-12 — Regulador de pressão (ajustável)",
+      "T-12 — Redutor de pressão",
+      "T-12 — Amortecedor de pressão"
+    ],
+    correta:1,
+    explicacao:"A TSA disponibiliza uma linha específica de Regulador de pressão ajustável (T-12), que permite a regulagem fina da pressão de combustível — diferente do regulador padrão, que trabalha com um valor fixo predeterminado."
+  },
+  {
+    categoria:"Funcionamento de Componentes",
+    texto:"Qual é a função do amortecedor de pressão (T-12) dentro do sistema de alimentação de combustível?",
+    alternativas:[
+      "Aumentar a pressão gerada pela bomba de combustível",
+      "Reduzir pulsações e oscilações de pressão geradas pela bomba, evitando ruídos e instabilidade na injeção",
+      "Substituir a função do filtro de combustível",
+      "Controlar a temperatura do combustível no tanque"
+    ],
+    correta:1,
+    explicacao:"O amortecedor de pressão absorve as pulsações geradas pelo funcionamento da bomba elétrica de combustível, contribuindo para uma pressão mais estável no sistema e reduzindo ruídos (efeito martelo hidráulico)."
+  },
+  {
+    categoria:"Funcionamento de Componentes",
+    texto:"Em quais condições a Válvula Solenóide de Partida a Frio (T-14) atua no sistema de alimentação?",
+    alternativas:[
+      "Durante a partida do motor frio, auxiliando no enriquecimento momentâneo da mistura ar-combustível",
+      "Durante frenagens bruscas, auxiliando o sistema ABS",
+      "Apenas quando o ar-condicionado está ligado",
+      "Exclusivamente em rotações elevadas do motor"
+    ],
+    correta:0,
+    explicacao:"A Válvula Solenóide de Partida a Frio atua momentaneamente durante a partida do motor frio, fornecendo enriquecimento adicional de combustível para facilitar a ignição em baixas temperaturas."
+  },
+  {
+    categoria:"Diferencial Técnico TSA",
+    texto:"Segundo informações oficiais da empresa, o que diferencia a TSA das demais fabricantes brasileiras do segmento de sensores de nível de combustível?",
+    alternativas:[
+      "É a única do segmento no Brasil que possui fabricação própria do Resistor Card",
+      "É a única fabricante do setor com sede fora do Brasil",
+      "Não possui certificação de qualidade reconhecida",
+      "Fabrica exclusivamente para exportação, sem venda no mercado interno"
+    ],
+    correta:0,
+    explicacao:"A TSA declara ser a única empresa do segmento de sensores de nível de combustível no Brasil que possui fabricação própria do Resistor Card — componente eletrônico central para a precisão da leitura do sensor."
+  },
+  {
+    categoria:"Situação de Oficina",
+    texto:"Durante a troca do módulo de combustível, o técnico percebe vazamento pela tampa/trava do módulo, mas o sensor de nível e a flange estão íntegros. Qual linha de produto TSA deve ser substituída?",
+    alternativas:[
+      "T-03 — Flange da Bomba de Combustível",
+      "T-04 — Guarnição/Trava Roscada do Módulo de Combustível",
+      "T-07 — Sensor de Nível (Linha Pesada)",
+      "T-13 — Sensor ABS"
+    ],
+    correta:1,
+    explicacao:"Quando o vazamento ocorre pela tampa/trava do módulo (e não pelo sensor ou pela flange), o componente a ser verificado e substituído é a guarnição ou trava roscada do módulo de combustível, linha T-04."
+  },
+  {
+    categoria:"Funcionamento de Componentes",
+    texto:"Qual é a função do pré-filtro da bomba do módulo de combustível (T-04) em relação à bomba elétrica de combustível?",
+    alternativas:[
+      "Substituir totalmente o filtro de combustível principal do sistema",
+      "Reter impurezas maiores antes que o combustível entre na bomba, protegendo-a contra desgaste prematuro",
+      "Regular a pressão de saída da bomba",
+      "Controlar a temperatura do combustível no tanque"
+    ],
+    correta:1,
+    explicacao:"O pré-filtro tem a função de reter partículas maiores presentes no tanque antes que o combustível chegue à bomba elétrica, prolongando sua vida útil e prevenindo desgaste prematuro do motor da bomba."
+  },
+  {
+    categoria:"Linha de Produtos",
+    texto:"Qual código de linha a TSA reserva especificamente para boias de combustível de veículos antigos, diferenciando-a das boias tubulares padrão (T-06)?",
+    alternativas:["T-06","T-09","T-01","T-07"],
+    correta:1,
+    explicacao:"A TSA classifica em uma linha separada, a T-09, as boias de combustível destinadas a veículos antigos, distinguindo-as das boias tubulares (T-06) utilizadas em aplicações mais recentes."
+  },
+  {
+    categoria:"Venda Técnica",
+    texto:"Um cliente relata que, após instalar um sensor de nível de combustível genérico (sem fabricação própria de Resistor Card), o marcador do painel passou a oscilar de forma não linear. Qual explicação técnica é mais coerente para orientar esse cliente?",
+    alternativas:[
+      "O Resistor Card determina a curva de resistência que traduz a posição da boia em leitura precisa no painel; um resistor mal calibrado gera leituras não lineares ou instáveis",
+      "O Resistor Card não tem qualquer relação com a leitura do painel de combustível",
+      "A oscilação é sempre causada pelo tanque de combustível, nunca pelo sensor instalado",
+      "Sensores sem fabricação própria do Resistor Card apresentam apenas problema estético, sem afetar a leitura"
+    ],
+    correta:0,
+    explicacao:"O Resistor Card é o componente eletrônico que define a curva de resistência correspondente à posição da boia. Um resistor de má qualidade ou mal calibrado compromete diretamente a linearidade e a precisão da leitura exibida no painel."
+  }
+];
+
+/* ============================================================
+   ESTADO E LÓGICA DO QUIZ
+   ============================================================ */
+let indiceAtual = 0;
+let pontuacaoTotal = 0;
+let acertos = 0;
+let erros = 0;
+let temposRespostas = [];
+let timer = null;
+let tempoRestante = 50;
+const TEMPO_TOTAL = 50;
+
+function $(id){ return document.getElementById(id); }
+
+function mostrarTela(id){
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  $(id).classList.add('active');
+}
+
+function iniciarQuiz(){
+  indiceAtual = 0;
+  pontuacaoTotal = 0;
+  acertos = 0;
+  erros = 0;
+  temposRespostas = [];
+  mostrarTela('screen-pergunta');
+  carregarPergunta();
+}
+
+function calcularBonus(segRestantes){
+  if(segRestantes >= 40) return 50;
+  if(segRestantes >= 30) return 40;
+  if(segRestantes >= 20) return 30;
+  if(segRestantes >= 10) return 20;
+  if(segRestantes >= 1) return 10;
+  return 0;
+}
+
+function carregarPergunta(){
+  const p = perguntas[indiceAtual];
+  $('qCount').textContent = `Pergunta ${indiceAtual+1} de ${perguntas.length}`;
+  $('scorePill').textContent = `${pontuacaoTotal} pts`;
+  $('progressFill').style.width = `${(indiceAtual/perguntas.length)*100}%`;
+  $('categoriaTag').textContent = p.categoria;
+  $('perguntaTexto').textContent = p.texto;
+
+  const box = $('alternativasBox');
+  box.innerHTML = '';
+  const letras = ['A','B','C','D'];
+  p.alternativas.forEach((texto, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'alt-btn';
+    btn.innerHTML = `<span class="alt-letra">${letras[i]}</span><span>${texto}</span>`;
+    btn.onclick = () => responder(i);
+    box.appendChild(btn);
+  });
+
+  tempoRestante = TEMPO_TOTAL;
+  atualizarTimerVisual();
+  clearInterval(timer);
+  timer = setInterval(() => {
+    tempoRestante--;
+    atualizarTimerVisual();
+    if(tempoRestante <= 0){
+      clearInterval(timer);
+      responder(-1); // tempo esgotado
+    }
+  }, 1000);
+}
+
+function atualizarTimerVisual(){
+  const circle = $('timerCircle');
+  circle.textContent = tempoRestante;
+  circle.classList.remove('warning','danger');
+  if(tempoRestante <= 10) circle.classList.add('danger');
+  else if(tempoRestante <= 20) circle.classList.add('warning');
+}
+
+function responder(indiceEscolhido){
+  clearInterval(timer);
+  const p = perguntas[indiceAtual];
+  const botoes = document.querySelectorAll('#alternativasBox .alt-btn');
+  botoes.forEach(b => b.disabled = true);
+
+  const correta = p.correta;
+  const acertou = indiceEscolhido === correta;
+  let pontosGanhos = 0;
+
+  if(indiceEscolhido !== -1){
+    botoes[indiceEscolhido].classList.add(acertou ? 'correct' : 'incorrect');
+  }
+  if(!acertou){
+    botoes[correta].classList.add('correct');
+  }
+
+  if(acertou){
+    const bonus = calcularBonus(tempoRestante);
+    pontosGanhos = 100 + bonus;
+    pontuacaoTotal += pontosGanhos;
+    acertos++;
+  } else {
+    erros++;
+  }
+
+  temposRespostas.push(TEMPO_TOTAL - tempoRestante);
+
+  // preparar tela de feedback
+  $('feedbackIcon').textContent = acertou ? '✅' : '❌';
+  $('feedbackTitle').textContent = acertou ? 'RESPOSTA CORRETA!' : (indiceEscolhido === -1 ? 'TEMPO ESGOTADO' : 'RESPOSTA INCORRETA');
+  $('feedbackTitle').className = 'feedback-title ' + (acertou ? 'ok' : 'fail');
+  $('feedbackPts').textContent = acertou ? `+${pontosGanhos} pontos (100 base + ${pontosGanhos-100} bônus de tempo)` : '0 pontos';
+
+  const letras = ['A','B','C','D'];
+  let linhas = '';
+  if(indiceEscolhido !== -1){
+    linhas += `<div class="resposta-linha">Você respondeu: <b>${letras[indiceEscolhido]}</b></div>`;
+  } else {
+    linhas += `<div class="resposta-linha">Você não respondeu a tempo.</div>`;
+  }
+  if(!acertou){
+    linhas += `<div class="resposta-linha">Resposta correta: <b>${letras[correta]}</b></div>`;
+  }
+  $('respostaLinhas').innerHTML = linhas;
+  $('explicacaoTexto').textContent = p.explicacao;
+
+  $('scorePill').textContent = `${pontuacaoTotal} pts`;
+  mostrarTela('screen-feedback');
+}
+
+function proximaPergunta(){
+  indiceAtual++;
+  if(indiceAtual >= perguntas.length){
+    mostrarResultado();
+  } else {
+    mostrarTela('screen-pergunta');
+    carregarPergunta();
+  }
+}
+
+function mostrarResultado(){
+  mostrarTela('screen-resultado');
+  const total = perguntas.length;
+  const percentual = Math.round((acertos/total)*100);
+  const tempoMedio = Math.round(temposRespostas.reduce((a,b)=>a+b,0)/temposRespostas.length);
+
+  $('pontuacaoFinal').textContent = pontuacaoTotal;
+  $('acertosFinal').textContent = `${acertos}/${total}`;
+  $('errosFinal').textContent = `${erros}/${total}`;
+  $('tempoMedioFinal').textContent = `${tempoMedio}s`;
+  $('dominioFinal').textContent = `${acertos}/${total}`;
+  $('percentualLabel').textContent = `${percentual}%`;
+
+  setTimeout(() => { $('barraFinalFill').style.width = `${percentual}%`; }, 100);
+
+  let trofeu, titulo, msg;
+  if(percentual >= 95){
+    trofeu = '🏆'; titulo = 'EXPERT TSA';
+    msg = 'Você mostrou domínio técnico e capacidade de aplicar o conhecimento TSA em situações práticas. Desempenho de referência!';
+    dispararConfete();
+  } else if(percentual >= 80){
+    trofeu = '🟢'; titulo = 'NÍVEL AVANÇADO';
+    msg = 'Excelente domínio técnico dos produtos e aplicações TSA. Poucos detalhes separam você do nível EXPERT.';
+  } else if(percentual >= 60){
+    trofeu = '🟡'; titulo = 'BOM CONHECIMENTO';
+    msg = 'Bom domínio geral, mas alguns pontos técnicos merecem revisão para atuação em situações mais complexas de campo.';
+  } else if(percentual >= 40){
+    trofeu = '🟠'; titulo = 'EM DESENVOLVIMENTO';
+    msg = 'Você já conhece o básico da TSA, mas precisa aprofundar o conhecimento técnico dos produtos e procedimentos.';
+  } else {
+    trofeu = '🔴'; titulo = 'PRECISA TREINAR';
+    msg = 'Este é o momento de revisar o material técnico TSA com atenção — procedimentos, linhas de produto e diagnósticos.';
+  }
+  $('trofeuFinal').textContent = trofeu;
+  $('classificacaoTexto').textContent = titulo;
+  $('mensagemFinal').innerHTML = `<b>${trofeu} ${titulo}</b><br>${msg}<br><br>Você dominou <b>${acertos} de ${total}</b> desafios técnicos.`;
+}
+
+function reiniciarQuiz(){
+  mostrarTela('screen-abertura');
+}
+
+function dispararConfete(){
+  const cores = ['#12336b','#3f7fd1','#f2a30f','#1fa15a','#ffffff'];
+  for(let i=0;i<60;i++){
+    const c = document.createElement('div');
+    c.className = 'confetti';
+    c.style.left = Math.random()*100 + 'vw';
+    c.style.background = cores[Math.floor(Math.random()*cores.length)];
+    c.style.animationDuration = (2.5 + Math.random()*2) + 's';
+    c.style.animationDelay = (Math.random()*0.6) + 's';
+    document.body.appendChild(c);
+    setTimeout(()=>c.remove(), 5000);
+  }
+}
+</script>
+</body>
+</html>
